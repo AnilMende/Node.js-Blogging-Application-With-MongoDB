@@ -13,8 +13,7 @@ const userSchema = new Schema({
         unique:true
     },
     salt: {
-        type:String,
-        required:true
+        type:String
     },
     password:{
         type:String,
@@ -39,13 +38,29 @@ userSchema.pre('save', function (next){
     // to get random string we use randomBytes
     // salt acts as the key to hash the password
     const salt = randomBytes(16).toString();
-
     const hashedPassword = createHmac('sha256', salt)
                            .update(user.password)
                            .digest('hex');
     this.salt = salt;
     this.password = hashedPassword;
     next();
+})
+
+
+userSchema.static("matchPassword", async function(email, password){
+    const user = await this.findOne({ email });
+
+    if(!user) throw new Error("User Not Found");
+
+    const salt = user.salt;
+    const hashedPassword = user.password;
+
+    const newPassword = createHmac("sha256", salt)
+        .update(password)
+        .digest("hex")
+    if(hashedPassword !== newPassword) throw new Error("Incorrect Password")
+    return user;
+
 })
 
 const USER = model("user", userSchema)
