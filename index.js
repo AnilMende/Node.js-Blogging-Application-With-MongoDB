@@ -5,7 +5,11 @@ dotenv.config();
 const mongoose = require('mongoose');
 const cookieParser = require('cookie-parser');
 
+const Blog = require('./models/blogs.js');
+
 const userRoute = require('./routes/user.route.js');
+const blogRoute = require('./routes/blog.route.js');
+
 const { checkForAuthenticationCookie } = require('./middlewares/authentication.js');
 
 const app = express();
@@ -26,12 +30,20 @@ app.use(express.urlencoded({extended : false}));
 app.use(cookieParser());
 app.use(checkForAuthenticationCookie("token"));
 
-app.get('/', (req, res) => {
+// anything in the public folder can be served as the static
+app.use(express.static(path.resolve('./public')));
+
+app.get('/', async (req, res) => {
+
+    const allBlogs = await Blog.find({});
+
     res.render("home",{
         user : req.user,
+        blogs : allBlogs
     });
 })
 
 app.use('/users', userRoute);
+app.use('/blog', blogRoute);
 
 app.listen(PORT, () => console.log(`Server Started at PORT: ${PORT}`));
