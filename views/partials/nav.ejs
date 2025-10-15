@@ -9,19 +9,46 @@
         <li class="nav-item">
           <a class="nav-link active" aria-current="page" href="#">Home</a>
         </li>
-        <li class="nav-item">
+
+        <!-- if the current user is exists then we have to show the add blog -->
+        <% if (locals.user) { %>
+         <li class="nav-item">
           <a class="nav-link" href="#">Add Blog</a>
         </li>
-        
+
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-            AnilMende
+          <a class="nav-link dropdown-toggle" 
+             href="#" role="button" 
+             data-bs-toggle="dropdown" 
+             aria-expanded="false">
+             AnilMende
           </a>
           <ul class="dropdown-menu">
-            <li><a class="dropdown-item" href="#">Logout</a></li>
+            <li><a class="dropdown-item" 
+              href="/users/logout">Logout</a></li>
           </ul>
         </li>
+
+        <% } else{%>
+
+          <li class="nav-item">
+            <a class="nav-link" href="/users/signup">Create Account</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link" href="/users/signin">SignIn</a>
+          </li>
+
+        <% } %>
+
+        
       </ul>
     </div>
   </div>
 </nav>
+<!-- to display the error for wrong signin -->
+<% if (locals.error) { %>
+     <div class="alert alert-danger" role="alert">
+          <%= locals.error %>
+     </div>
+<% } %>
