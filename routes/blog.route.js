@@ -3,6 +3,9 @@ const multer = require('multer');
 const path = require('path');
 
 const Blog = require('../models/blogs.js');
+const Comment = require('../models/comment.js');
+
+const { route } = require('./user.route.js');
 
 const router = express.Router();
 
@@ -29,6 +32,23 @@ router.get('/add-new', (req, res) => {
     })
 })
 
+// get blog by an id i.e.dynamic route
+router.get('/:id', async(req, res) => {
+  
+  const id = req.params.id;
+  const blog = await Blog.findById(id).populate("createdBy");
+  // console.log("blog", blog);
+  // adding the comments to the frontend
+  const comments = await Comment.find({ blogId : id}).populate('createdBy');
+  // console.log('comments', comments);
+
+  return res.render('blog',{
+    user: req.user,
+    blog,
+    comments,
+  })
+})
+
 // creating a new blog or adding a new blog
 router.post('/',upload.single('coverImage'), async (req, res) => {
     
@@ -44,7 +64,16 @@ router.post('/',upload.single('coverImage'), async (req, res) => {
     return res.redirect(`/blog/${blog._id}`);
 })
 
+// for creating a comment
+router.post('/comment/:blogId', async(req, res) => {
+  await Comment.create({
+    content : req.body.content,
+    blogId : req.params.blogId,
+    createdBy : req.user._id
+  });
 
+  return res.redirect(`/blog/${req.params.blogId}`);
+})
 
 
 module.exports = router;
